@@ -1,0 +1,50 @@
+/* App Component Styles */
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Loading State */
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1e3a8a;
+}
+
+.app-loading-content {
+  color: white;
+  text-align: center;
+}
+
+.app-loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid white;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.app-loading-text {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .app-loading-spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-loading-spinner {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}

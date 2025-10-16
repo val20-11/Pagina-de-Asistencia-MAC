@@ -1,0 +1,88 @@
+# Configuración de pre-commit hooks
+# Para instalar: pre-commit install
+# Para ejecutar manualmente: pre-commit run --all-files
+
+repos:
+  # Hooks generales
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Black - Formateador de código
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: [--line-length=120]
+
+  # isort - Ordenador de imports
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=120]
+
+  # Flake8 - Linter PEP8
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: [--config=.flake8]
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-comprehensions
+          - flake8-simplify
+
+  # Bandit - Verificador de seguridad
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml]
+        additional_dependencies: ["bandit[toml]"]
+
+  # Django specific checks
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.21.0
+    hooks:
+      - id: django-upgrade
+        args: [--target-version, "5.2"]
+
+  # Pylint (opcional, puede ser lento)
+  # - repo: https://github.com/PyCQA/pylint
+  #   rev: v3.3.2
+  #   hooks:
+  #     - id: pylint
+  #       args: [--rcfile=pyproject.toml]
+  #       additional_dependencies:
+  #         - pylint-django
+
+# Configuración global
+default_language_version:
+  python: python3.11
+
+# Etapas en las que ejecutar los hooks
+default_stages: [commit, push]
+
+# Excluir archivos
+exclude: |
+  (?x)^(
+      migrations/.*|
+      staticfiles/.*|
+      media/.*|
+      .*\.min\.(js|css)
+  )$

@@ -1,0 +1,40 @@
+# Herramientas de desarrollo y calidad de código
+
+# Linting y formateo de código
+flake8==7.1.1                    # Verificador de estilo PEP8
+pycodestyle==2.12.1              # Verificador de estilo PEP8 (antes pep8)
+autopep8==2.3.1                  # Corrector automático de PEP8
+black==24.8.0                    # Formateador de código opinionado
+isort==5.13.2                    # Ordenador de imports
+
+# Análisis estático y complejidad
+pylint==3.3.2                    # Analizador de código estático
+mccabe==0.7.0                    # Complejidad ciclomática
+radon==6.0.1                     # Métricas de código
+
+# Type checking
+mypy==1.13.0                     # Verificador de tipos estáticos
+django-stubs==5.1.1              # Type stubs para Django
+djangorestframework-stubs==3.15.1  # Type stubs para DRF
+
+# Seguridad
+bandit==1.8.0                    # Verificador de seguridad
+safety==3.6.2                    # Verificador de vulnerabilidades
+
+# Testing
+pytest==8.3.4                    # Framework de testing
+pytest-django==4.9.0             # Plugin pytest para Django
+pytest-cov==6.0.0                # Cobertura de tests
+coverage==7.6.9                  # Herramienta de cobertura
+factory-boy==3.3.1               # Factories para testing
+
+# Testing automation
+tox==4.23.2                      # Automatización de testing multi-entorno
+
+# Pre-commit hooks
+pre-commit==4.0.1                # Framework de pre-commit hooks
+
+# Utilidades de desarrollo
+django-extensions==3.2.3         # Extensiones útiles para Django
+ipython==8.29.0                  # Shell interactivo mejorado
+ipdb==0.13.13                    # Debugger interactivo

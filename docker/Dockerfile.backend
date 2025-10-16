@@ -1,0 +1,38 @@
+# Dockerfile para Backend Django
+FROM python:3.11-slim
+
+# Variables de entorno para Python
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar requirements y instalar dependencias Python
+COPY backend/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    pip install gunicorn whitenoise
+
+# Copiar código del backend
+COPY backend/ .
+
+# Crear directorio para archivos estáticos y media
+RUN mkdir -p /app/staticfiles /app/media
+
+# Colectar archivos estáticos
+RUN python manage.py collectstatic --noinput || true
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando para ejecutar con gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "mac_attendance.wsgi:application"]

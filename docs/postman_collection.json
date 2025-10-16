@@ -1,0 +1,347 @@
+{
+  "info": {
+    "name": "Sistema MAC - API Collection",
+    "_postman_id": "mac-attendance-api",
+    "description": "Colección completa de endpoints para el Sistema de Asistencia MAC",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('access_token', jsonData.tokens.access);",
+                  "    pm.environment.set('refresh_token', jsonData.tokens.refresh);",
+                  "    pm.test('Login successful', () => {",
+                  "        pm.expect(jsonData.message).to.eql('Login exitoso');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_number\": \"3123123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login", ""]
+            },
+            "description": "Iniciar sesión con número de cuenta"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            },
+            "description": "Obtener perfil del usuario autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Auth Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/check-auth/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "check-auth", ""]
+            },
+            "description": "Verificar estado de autenticación"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('access_token', jsonData.access);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "token", "refresh", ""]
+            },
+            "description": "Refrescar access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout", ""]
+            },
+            "description": "Cerrar sesión"
+          },
+          "response": []
+        },
+        {
+          "name": "System Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/system-config/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "system-config", ""]
+            },
+            "description": "Obtener configuración del sistema"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""]
+            },
+            "description": "Listar todos los eventos activos"
+          },
+          "response": []
+        },
+        {
+          "name": "Register External User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Juan Pérez\",\n  \"account_number\": \"9999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/external/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "external", "register", ""]
+            },
+            "description": "Registrar usuario externo"
+          },
+          "response": []
+        },
+        {
+          "name": "Search External Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events/external/search/?account_number=9999999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "external", "search", ""],
+              "query": [
+                {
+                  "key": "account_number",
+                  "value": "9999999"
+                }
+              ]
+            },
+            "description": "Buscar usuarios externos"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Register Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": 1,\n  \"account_number\": \"0000111\",\n  \"registration_method\": \"manual\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/attendance/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", ""]
+            },
+            "description": "Registrar asistencia a evento"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/attendance/stats/?account_number=0000111",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "stats", ""],
+              "query": [
+                {
+                  "key": "account_number",
+                  "value": "0000111"
+                }
+              ]
+            },
+            "description": "Obtener estadísticas de asistencia"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Attendances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/attendance/recent/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "recent", ""]
+            },
+            "description": "Obtener asistencias recientes"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Attendances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/attendance/my/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "attendance", "my", ""]
+            },
+            "description": "Obtener mis asistencias"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+[flake8]
+# Configuración de Flake8 para verificación de estilo PEP8
+
+# Longitud máxima de línea (PEP8 recomienda 79, pero muchos proyectos usan 88-120)
+max-line-length = 120
+
+# Complejidad ciclomática máxima (recomendado: 10-15)
+max-complexity = 12
+
+# Archivos y directorios a excluir
+exclude =
+    .git,
+    __pycache__,
+    */migrations/*,
+    */venv/*,
+    */env/*,
+    .venv,
+    staticfiles,
+    media,
+    */node_modules/*,
+    .pytest_cache,
+    htmlcov,
+    dist,
+    build,
+    *.egg-info
+
+# Reglas a ignorar
+ignore =
+    # E203: whitespace before ':' (conflicto con black)
+    E203,
+    # E501: line too long (ya lo controlamos con max-line-length)
+    E501,
+    # W503: line break before binary operator (conflicto con PEP8 actualizado)
+    W503,
+    # E402: module level import not at top of file (necesario en algunos casos)
+    # E402,
+
+# Reglas específicas por archivo
+per-file-ignores =
+    # __init__.py puede tener imports sin usar
+    __init__.py:F401,
+    # settings.py puede tener líneas largas
+    settings.py:E501,
+    # tests pueden usar asserts
+    test_*.py:S101,
+    **/tests.py:S101
+
+# Mostrar el código fuente de cada error
+show-source = True
+
+# Mostrar el PEP relevante para cada error
+show-pep8 = True
+
+# Contar número de errores
+count = True
+
+# Estadísticas al final
+statistics = True
+
+# Formato de salida
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s

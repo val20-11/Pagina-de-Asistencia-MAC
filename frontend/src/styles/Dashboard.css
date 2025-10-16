@@ -1,0 +1,335 @@
+/* Dashboard Styles - Responsive */
+
+.dashboard {
+    min-height: 100vh;
+    background-color: #f3f4f6;
+}
+
+.dashboard-nav {
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.dashboard-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-title {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.dashboard-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-user-name {
+    color: #374151;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    display: none;
+}
+
+.dashboard-theme-btn {
+    background-color: #f3f4f6;
+    color: #111827;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-theme-btn:hover {
+    background-color: #e5e7eb;
+    transform: scale(1.05);
+}
+
+.dashboard-logout-btn {
+    background-color: #dc2626;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.dashboard-logout-btn:hover {
+    background-color: #b91c1c;
+}
+
+.dashboard-content {
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Loading State */
+.dashboard-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e3a8a;
+}
+
+.dashboard-loading-content {
+    color: white;
+    text-align: center;
+}
+
+.dashboard-loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid white;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+/* Responsive Breakpoints */
+
+/* Mobile (default): 320px - 767px */
+@media (max-width: 767px) {
+    .dashboard-nav-container {
+        height: auto;
+        min-height: 4rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .dashboard-title {
+        flex: 1 1 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-nav-actions {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .dashboard-content {
+        padding: 1rem 0.5rem;
+    }
+}
+
+/* Tablet: 768px - 1023px */
+@media (min-width: 768px) {
+    .dashboard-nav-container {
+        padding: 0 2rem;
+    }
+
+    .dashboard-user-name {
+        display: block;
+    }
+
+    .dashboard-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .dashboard-logout-btn {
+        padding: 0.5rem 1.25rem;
+    }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+    .dashboard-nav-container {
+        padding: 0 3rem;
+    }
+
+    .dashboard-content {
+        padding: 2rem;
+    }
+
+    .dashboard-nav-actions {
+        gap: 1rem;
+    }
+}
+
+/* Large Desktop: 1440px+ */
+@media (min-width: 1440px) {
+    .dashboard-nav-container {
+        max-width: 1400px;
+    }
+}
+
+/* Dark Theme */
+body.dark-theme .dashboard {
+    background-color: #0f172a;
+}
+
+body.dark-theme .dashboard-nav {
+    background-color: #1e293b;
+    border-bottom: 2px solid #334155;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .dashboard-title {
+    color: #f8fafc;
+}
+
+body.dark-theme .dashboard-user-name {
+    color: #cbd5e1;
+}
+
+body.dark-theme .dashboard-theme-btn {
+    background-color: #334155;
+    color: #f8fafc;
+    border-color: #475569;
+}
+
+body.dark-theme .dashboard-theme-btn:hover {
+    background-color: #475569;
+}
+
+/* Dark theme for panels - SOLO aplica dentro del dashboard */
+body.dark-theme .dashboard {
+    background-color: #0f172a;
+    color: #f9fafb;
+}
+
+body.dark-theme .dashboard h2,
+body.dark-theme .dashboard h3 {
+    color: #f9fafb !important;
+}
+
+body.dark-theme .dashboard label {
+    color: #cbd5e1 !important;
+}
+
+body.dark-theme .dashboard input,
+body.dark-theme .dashboard select,
+body.dark-theme .dashboard textarea {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-theme .dashboard input::placeholder {
+    color: #64748b !important;
+}
+
+body.dark-theme .dashboard-content > div > div,
+body.dark-theme .dashboard-content div[style*="background-color: white"],
+body.dark-theme .dashboard-content div[style*="backgroundColor: white"],
+body.dark-theme .dashboard div[style*="background-color: white"],
+body.dark-theme .dashboard div[style*="backgroundColor: white"] {
+    background-color: #1e293b !important;
+    color: #f9fafb !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-theme .dashboard table {
+    background-color: #1e293b !important;
+}
+
+body.dark-theme .dashboard thead {
+    background-color: #334155 !important;
+}
+
+body.dark-theme .dashboard th {
+    color: #94a3b8 !important;
+}
+
+body.dark-theme .dashboard td {
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-theme .dashboard tr {
+    border-color: #334155 !important;
+}
+
+body.dark-theme .dashboard tr:hover {
+    background-color: #334155 !important;
+}
+
+body.dark-theme .dashboard p,
+body.dark-theme .dashboard small {
+    color: #cbd5e1 !important;
+}
+
+body.dark-theme .dashboard button:not(.dashboard-logout-btn):not(.dashboard-theme-btn) {
+    background-color: #1e40af !important;
+}
+
+body.dark-theme .dashboard button:not(.dashboard-logout-btn):not(.dashboard-theme-btn):hover {
+    background-color: #1e3a8a !important;
+}
+
+/* Forzar fondo oscuro en todos los divs con estilos inline blancos - SOLO en dashboard */
+body.dark-theme .dashboard [style*="background-color: white"],
+body.dark-theme .dashboard [style*="backgroundColor: white"],
+body.dark-theme .dashboard [style*="background-color:#fff"],
+body.dark-theme .dashboard [style*="backgroundColor:#fff"],
+body.dark-theme .dashboard [style*="background: white"],
+body.dark-theme .dashboard [style*="background:#fff"] {
+    background-color: #1e293b !important;
+    background: #1e293b !important;
+}
+
+/* Asegurar que los contenedores de grid también sean oscuros - SOLO en dashboard */
+body.dark-theme .dashboard div[style*="padding: 1.5rem"][style*="border-radius"],
+body.dark-theme .dashboard div[style*="box-shadow"] {
+    background-color: #1e293b !important;
+}
+
+/* Mensajes de error y éxito en tema oscuro - SOLO en dashboard */
+body.dark-theme .dashboard div[style*="#dcfdf7"] {
+    background-color: #064e3b !important;
+    border-color: #059669 !important;
+}
+
+body.dark-theme .dashboard div[style*="#fef2f2"] {
+    background-color: #7f1d1d !important;
+    border-color: #dc2626 !important;
+}
+
+/* Print Styles */
+@media print {
+    .dashboard-nav {
+        display: none;
+    }
+
+    .dashboard-logout-btn {
+        display: none;
+    }
+
+    .dashboard-theme-btn {
+        display: none;
+    }
+
+    .dashboard {
+        background: white;
+    }
+
+    body.dark-theme .dashboard {
+        background: white;
+    }
+}

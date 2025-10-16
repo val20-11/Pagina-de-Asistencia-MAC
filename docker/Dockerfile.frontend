@@ -1,0 +1,27 @@
+# Etapa 1: Build del Frontend
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /app/frontend
+
+# Copiar archivos de dependencias
+COPY frontend/package*.json ./
+
+# Instalar dependencias (incluyendo devDependencies para el build)
+RUN npm ci
+
+# Copiar código fuente
+COPY frontend/ ./
+
+# Construir aplicación para producción
+RUN npm run build
+
+# Etapa 2: Nginx para servir el frontend
+FROM nginx:alpine
+
+# Copiar archivos construidos del frontend
+COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
+
+# Exponer puerto
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
