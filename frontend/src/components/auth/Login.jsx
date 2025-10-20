@@ -25,9 +25,9 @@ const Login = () => {
         setLoading(true)
         setError('')
 
-        // Validar formato: 7 dígitos
-        if (!/^\d{7}$/.test(accountNumber)) {
-            setError('El número de cuenta debe tener exactamente 7 dígitos')
+        // Validar formato: 8 dígitos
+        if (!/^\d{8}$/.test(accountNumber)) {
+            setError('El número de cuenta debe tener exactamente 8 dígitos')
             setLoading(false)
             return
         }
@@ -79,17 +79,17 @@ const Login = () => {
                             type="text"
                             value={accountNumber}
                             onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '').slice(0, 7)
+                                const value = e.target.value.replace(/\D/g, '').slice(0, 8)
                                 setAccountNumber(value)
                             }}
                             className="login-input"
-                            placeholder="1234567"
+                            placeholder="12345678"
                             required
                             disabled={loading}
-                            maxLength="7"
+                            maxLength="8"
                         />
                         <small className="login-input-hint">
-                            Ingresa tu número de cuenta de 7 dígitos
+                            Ingresa tu número de cuenta de 8 dígitos
                         </small>
                     </div>
 

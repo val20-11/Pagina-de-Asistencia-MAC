@@ -104,7 +104,10 @@ class Event(models.Model):
             raise ValidationError("Los eventos en línea o híbridos requieren un enlace de reunión.")
     
     def save(self, *args, **kwargs):
-        self.clean()
+        # Permitir omitir validación para importaciones históricas
+        skip_validation = kwargs.pop('skip_validation', False)
+        if not skip_validation:
+            self.clean()
         super().save(*args, **kwargs)
     
     @property

@@ -20,9 +20,9 @@ class LoginSerializer(serializers.Serializer):
     account_number = serializers.CharField(max_length=20)
 
     def validate_account_number(self, value):
-        # Validar formato para números de cuenta (7 dígitos)
-        if not re.match(r'^\d{7}$', value):
-            raise serializers.ValidationError('El número de cuenta debe tener exactamente 7 dígitos.')
+        # Validar formato para números de cuenta (8 dígitos)
+        if not re.match(r'^\d{8}$', value):
+            raise serializers.ValidationError('El número de cuenta debe tener exactamente 8 dígitos.')
         return value
 
     def validate(self, data):

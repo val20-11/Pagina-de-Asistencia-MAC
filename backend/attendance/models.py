@@ -154,9 +154,12 @@ class Attendance(models.Model):
                 )
     
     def save(self, *args, **kwargs):
-        self.clean()
+        # Permitir omitir validación para importaciones históricas
+        skip_validation = kwargs.pop('skip_validation', False)
+        if not skip_validation:
+            self.clean()
         super().save(*args, **kwargs)
-        
+
         # Actualizar estadísticas si es estudiante regular
         if self.student:
             self.update_student_stats()

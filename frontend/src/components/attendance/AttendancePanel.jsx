@@ -39,9 +39,9 @@ const AttendancePanel = () => {
         }
     }, [events])
 
-    // Auto-registrar cuando se complete un número de cuenta de 7 dígitos
+    // Auto-registrar cuando se complete un número de cuenta de 8 dígitos
     useEffect(() => {
-        if (studentAccount.length === 7 && selectedEvent) {
+        if (studentAccount.length === 8 && selectedEvent) {
             registerAttendance()
         }
     }, [studentAccount])
@@ -161,8 +161,8 @@ const AttendancePanel = () => {
             return
         }
 
-        if (!/^\d{7}$/.test(externalUser.account_number)) {
-            setMessage('El número de cuenta debe tener exactamente 7 dígitos')
+        if (!/^\d{8}$/.test(externalUser.account_number)) {
+            setMessage('El número de cuenta debe tener exactamente 8 dígitos')
             setMessageType('error')
             return
         }
@@ -292,18 +292,18 @@ const AttendancePanel = () => {
 
                     <div style={{ marginBottom: '1rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#1e3a8a', fontSize: '1.125rem' }}>
-                            Número de Cuenta (7 dígitos)
+                            Número de Cuenta (8 dígitos)
                         </label>
                         <input
                             ref={inputRef}
                             type="text"
                             value={studentAccount}
                             onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '').slice(0, 7)
+                                const value = e.target.value.replace(/\D/g, '').slice(0, 8)
                                 setStudentAccount(value)
                             }}
                             placeholder="Escanea o escribe..."
-                            maxLength="7"
+                            maxLength="8"
                             autoFocus
                             style={{
                                 width: '100%',
@@ -317,7 +317,7 @@ const AttendancePanel = () => {
                             }}
                         />
                         <p style={{ fontSize: '0.875rem', color: '#059669', marginTop: '0.75rem', fontWeight: '500', textAlign: 'center' }}>
-                            ✓ El registro es automático al completar 7 dígitos
+                            ✓ El registro es automático al completar 8 dígitos
                         </p>
                         <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem', textAlign: 'center' }}>
                             Usa el escáner USB o escribe manualmente
@@ -460,17 +460,17 @@ const AttendancePanel = () => {
                     <form onSubmit={createExternalUser} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#1e3a8a', fontSize: '0.875rem' }}>
-                                Número de Cuenta (7 dígitos) *
+                                Número de Cuenta (8 dígitos) *
                             </label>
                             <input
                                 type="text"
                                 value={externalUser.account_number}
                                 onChange={(e) => {
-                                    const value = e.target.value.replace(/\D/g, '').slice(0, 7)
+                                    const value = e.target.value.replace(/\D/g, '').slice(0, 8)
                                     setExternalUser({ ...externalUser, account_number: value })
                                 }}
-                                placeholder="1234567"
-                                maxLength="7"
+                                placeholder="12345678"
+                                maxLength="8"
                                 required
                                 style={{ width: '100%', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '0.375rem' }}
                             />

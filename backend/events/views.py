@@ -56,9 +56,9 @@ def register_external_user(request):
     if not account_number or not full_name:
         return Response({'error': 'Número de cuenta y nombre completo son requeridos'}, status=400)
 
-    # Validar formato de número de cuenta (7 dígitos)
-    if not re.match(r'^\d{7}$', account_number):
-        return Response({'error': 'El número de cuenta debe tener exactamente 7 dígitos'}, status=400)
+    # Validar formato de número de cuenta (8 dígitos)
+    if not re.match(r'^\d{8}$', account_number):
+        return Response({'error': 'El número de cuenta debe tener exactamente 8 dígitos'}, status=400)
 
     # Verificar que no exista en usuarios regulares
     from authentication.models import UserProfile

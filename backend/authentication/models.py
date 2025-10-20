@@ -12,11 +12,11 @@ class UserProfile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     account_number = models.CharField(
-        max_length=7,
+        max_length=8,
         unique=True,
         validators=[RegexValidator(
-            regex=r'^\d{7}$',
-            message='El número de cuenta debe tener exactamente 7 dígitos.'
+            regex=r'^\d{8}$',
+            message='El número de cuenta debe tener exactamente 8 dígitos.'
         )],
         verbose_name="Número de cuenta"
     )
@@ -68,7 +68,7 @@ class ExternalUser(models.Model):
 
     full_name = models.CharField(max_length=200, verbose_name="Nombre completo")
     account_number = models.CharField(
-        max_length=7,
+        max_length=8,
         unique=True,
         verbose_name="Número de cuenta"
     )
