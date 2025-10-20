@@ -10,7 +10,7 @@ class UserProfile(models.Model):
         ('assistant', 'Asistente'),
     )
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     account_number = models.CharField(
         max_length=7,
         unique=True,

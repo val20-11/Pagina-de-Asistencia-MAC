@@ -35,25 +35,32 @@ class StudentResource(resources.ModelResource):
         # Asignar automáticamente user_type como student
         row['user_type'] = 'student'
 
-    def after_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, row, using_transactions, dry_run, **kwargs):
         """Crear usuario de Django si no existe y asegurar que sea estudiante"""
-        if not dry_run:
-            # Asegurar que sea estudiante
-            if instance.user_type != 'student':
-                instance.user_type = 'student'
-                instance.save()
+        # Asegurar que sea estudiante
+        instance.user_type = 'student'
 
-            # Crear usuario de Django si no existe
-            if not instance.user_id:
-                user = User.objects.create_user(
-                    username=instance.account_number,
-                    first_name=instance.full_name,
-                    password=None
-                )
-                user.set_unusable_password()
-                user.save()
+        # Crear usuario de Django si no existe
+        if not instance.user_id:
+            # Buscar si ya existe el usuario
+            try:
+                user = User.objects.get(username=instance.account_number)
+            except User.DoesNotExist:
+                if not dry_run:
+                    # Solo crear en la base de datos si no es dry_run
+                    user = User.objects.create_user(
+                        username=instance.account_number,
+                        first_name=instance.full_name,
+                        password=None
+                    )
+                    user.set_unusable_password()
+                    user.save()
+                else:
+                    # En dry_run, dejar user como None (ahora permitido)
+                    user = None
+
+            if user:
                 instance.user = user
-                instance.save()
 
 
 class AssistantResource(resources.ModelResource):
@@ -75,26 +82,36 @@ class AssistantResource(resources.ModelResource):
         # Asignar automáticamente user_type como assistant
         row['user_type'] = 'assistant'
 
-    def after_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, row, using_transactions, dry_run, **kwargs):
         """Crear usuario de Django si no existe y asegurar que sea asistente"""
-        if not dry_run:
-            # Asegurar que sea asistente
-            if instance.user_type != 'assistant':
-                instance.user_type = 'assistant'
-                instance.save()
+        # Asegurar que sea asistente
+        instance.user_type = 'assistant'
 
-            # Crear usuario de Django si no existe
-            if not instance.user_id:
-                user = User.objects.create_user(
-                    username=instance.account_number,
-                    first_name=instance.full_name,
-                    password=None
-                )
-                user.set_unusable_password()
-                user.save()
+        # Crear usuario de Django si no existe
+        if not instance.user_id:
+            # Buscar si ya existe el usuario
+            try:
+                user = User.objects.get(username=instance.account_number)
+            except User.DoesNotExist:
+                if not dry_run:
+                    # Solo crear en la base de datos si no es dry_run
+                    user = User.objects.create_user(
+                        username=instance.account_number,
+                        first_name=instance.full_name,
+                        password=None
+                    )
+                    user.set_unusable_password()
+                    user.save()
+                else:
+                    # En dry_run, dejar user como None (ahora permitido)
+                    user = None
+
+            if user:
                 instance.user = user
-                instance.save()
 
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        """Crear automáticamente el registro de Asistente después de guardar"""
+        if not dry_run:
             # Crear automáticamente el registro de Asistente si no existe
             from .models import Asistente
             Asistente.objects.get_or_create(
