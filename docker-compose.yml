@@ -22,6 +22,7 @@ services:
       dockerfile: docker/Dockerfile.backend
     command: >
       sh -c "python manage.py migrate &&
+             python init_db.py &&
              python manage.py collectstatic --noinput &&
              gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 300 mac_attendance.wsgi:application"
     volumes:

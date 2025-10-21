@@ -118,8 +118,10 @@ media/
 backup/
 backups/
 
-# EXCEPCIÓN: Permitir backup compartido para colaboradores
-!backend/fixtures/db_full_backup.sql
+# EXCEPCIÓN: Permitir fixtures para colaboradores
+!backend/fixtures/
+!backend/fixtures/*.json
+!backend/fixtures/*.sql
 
 # ==============================================
 # Archivos Temporales
@@ -129,3 +131,4 @@ backups/
 .cache/
 tmp/
 temp/
+.claude/

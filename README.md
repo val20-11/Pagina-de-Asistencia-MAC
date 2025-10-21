@@ -2,6 +2,16 @@
 
 Sistema de gestión de asistencia para ponencias y eventos académicos de Matemáticas Aplicadas y Computación (MAC).
 
+## ⚡ Inicio Rápido
+
+**¿Primera vez usando el proyecto?** Ver [QUICK_START.md](QUICK_START.md) - ¡En 3 comandos estarás listo!
+
+**¿Eres colaborador?** Ver [SETUP_COLABORADORES.md](SETUP_COLABORADORES.md) - Todo está precargado automáticamente
+
+**¿Quieres poner en producción?** Ver [GUIA_PRODUCCION.md](GUIA_PRODUCCION.md) - Guía completa de despliegue
+
+---
+
 ## 🚀 Características
 
 - **Gestión de Eventos**: Crear y administrar ponencias, talleres, seminarios
