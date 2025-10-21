@@ -30,6 +30,7 @@ django-ratelimit==4.1.0
 
 # Exportación de datos
  openpyxl==3.1.5
+ pandas==2.2.0
 
 # Generación de PDFs
 # reportlab==4.2.5

@@ -2,31 +2,21 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import datetime, time as dt_time, timedelta
-from authentication.models import UserProfile, ExternalUser
+from authentication.models import UserProfile
 from events.models import Event
 
 class Attendance(models.Model):
     REGISTRATION_METHODS = (
         ('manual', 'Registro Manual'),
         ('barcode', 'Código de Barras'),
-        ('external', 'Usuario Externo'),
     )
-    
-    # Puede ser estudiante regular o externo
+
+    # Estudiante que asiste
     student = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
-        blank=True,
-        null=True,
         limit_choices_to={'user_type': 'student'},
         verbose_name="Estudiante"
-    )
-    external_user = models.ForeignKey(
-        ExternalUser,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        verbose_name="Usuario Externo"
     )
     event = models.ForeignKey(
         Event,
@@ -66,12 +56,9 @@ class Attendance(models.Model):
         ordering = ['-timestamp']
     
     def clean(self):
-        # Debe tener estudiante O usuario externo, pero no ambos
-        if not self.student and not self.external_user:
-            raise ValidationError("Debe especificar un estudiante o usuario externo.")
-
-        if self.student and self.external_user:
-            raise ValidationError("No puede tener ambos: estudiante y usuario externo.")
+        # Validar que haya un estudiante
+        if not self.student:
+            raise ValidationError("Debe especificar un estudiante.")
 
         # Validar que el registrador sea un asistente
         if self.registered_by.user_type != 'assistant':
@@ -111,29 +98,17 @@ class Attendance(models.Model):
             )
 
         # Validar que no haya duplicados
-        if self.student:
-            existing = Attendance.objects.filter(
-                student=self.student,
-                event=self.event,
-                is_valid=True
-            )
-            if self.pk:
-                existing = existing.exclude(pk=self.pk)
-            if existing.exists():
-                raise ValidationError("Este estudiante ya tiene asistencia registrada para este evento.")
-        
-        if self.external_user:
-            existing = Attendance.objects.filter(
-                external_user=self.external_user,
-                event=self.event,
-                is_valid=True
-            )
-            if self.pk:
-                existing = existing.exclude(pk=self.pk)
-            if existing.exists():
-                raise ValidationError("Este usuario externo ya tiene asistencia registrada para este evento.")
-        
-        # Validar eventos simultáneos (solo para estudiantes regulares)
+        existing = Attendance.objects.filter(
+            student=self.student,
+            event=self.event,
+            is_valid=True
+        )
+        if self.pk:
+            existing = existing.exclude(pk=self.pk)
+        if existing.exists():
+            raise ValidationError("Este estudiante ya tiene asistencia registrada para este evento.")
+
+        # Validar eventos simultáneos
         if self.student:
             overlapping_events = Event.objects.filter(
                 date=self.event.date,
@@ -160,9 +135,8 @@ class Attendance(models.Model):
             self.clean()
         super().save(*args, **kwargs)
 
-        # Actualizar estadísticas si es estudiante regular
-        if self.student:
-            self.update_student_stats()
+        # Actualizar estadísticas del estudiante
+        self.update_student_stats()
     
     def update_student_stats(self):
         """Actualizar las estadísticas de asistencia del estudiante"""
@@ -178,21 +152,13 @@ class Attendance(models.Model):
     
     @property
     def attendee_name(self):
-        """Nombre del asistente (estudiante o externo)"""
-        if self.student:
-            return self.student.full_name
-        elif self.external_user:
-            return self.external_user.full_name
-        return "Desconocido"
-    
+        """Nombre del asistente"""
+        return self.student.full_name if self.student else "Desconocido"
+
     @property
     def attendee_identifier(self):
         """Identificador del asistente"""
-        if self.student:
-            return self.student.account_number
-        elif self.external_user:
-            return self.external_user.account_number
-        return "N/A"
+        return self.student.account_number if self.student else "N/A"
     
     def __str__(self):
         return f"{self.attendee_name} - {self.event.title}"

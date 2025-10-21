@@ -5,10 +5,8 @@ services:
   # PostgreSQL Database (Desarrollo)
   db:
     image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=mac_attendance
-      - POSTGRES_USER=mac_user
-      - POSTGRES_PASSWORD=mac_password_2024_secure
+    env_file:
+      - .env.development
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
     networks:
@@ -34,21 +32,8 @@ services:
       - ./backend:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-dev-key-change-in-production-12345
-      - ALLOWED_HOSTS=localhost,127.0.0.1,nginx,backend
-      - RATELIMIT_ENABLE=False
-      - SECURE_SSL_REDIRECT=False
-      - SESSION_COOKIE_SECURE=False
-      - CSRF_COOKIE_SECURE=False
-      - CORS_ALLOWED_ORIGINS=http://localhost,http://127.0.0.1,http://localhost:80
-      - DB_ENGINE=postgresql
-      - DB_NAME=mac_attendance
-      - DB_USER=mac_user
-      - DB_PASSWORD=mac_password_2024_secure
-      - DB_HOST=db
-      - DB_PORT=5432
+    env_file:
+      - .env.development
     networks:
       - app-network
     depends_on:
@@ -59,15 +44,15 @@ services:
     stdin_open: true  # Para ipdb y debugging interactivo
     tty: true
 
-  # Frontend React + Nginx
+  # Frontend React + Nginx (HTTP sin SSL para desarrollo local)
   nginx:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
     ports:
-      - "80:80"
+      - "80:80"  # HTTP para desarrollo (sin SSL)
     volumes:
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx.dev.conf:/etc/nginx/conf.d/default.conf  # Configuración sin SSL
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:

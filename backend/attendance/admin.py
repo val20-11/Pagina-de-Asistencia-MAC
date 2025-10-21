@@ -35,16 +35,15 @@ class AttendanceStatsResource(resources.ModelResource):
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ['attendee_name', 'attendee_identifier', 'event', 'timestamp', 'registration_method', 'get_registered_by', 'is_valid']
     list_filter = ['registration_method', 'registered_by', 'event__date', 'is_valid', 'event']
-    search_fields = ['student__full_name', 'student__account_number', 'external_user__full_name',
-                     'external_user__temporary_id', 'event__title', 'registered_by__full_name',
-                     'registered_by__account_number']
+    search_fields = ['student__full_name', 'student__account_number', 'event__title',
+                     'registered_by__full_name', 'registered_by__account_number']
     ordering = ['-timestamp']
     readonly_fields = ['timestamp', 'attendee_name', 'attendee_identifier']
     date_hierarchy = 'timestamp'
 
     fieldsets = (
         ('Información del Asistente', {
-            'fields': ('student', 'external_user', 'attendee_name', 'attendee_identifier')
+            'fields': ('student', 'attendee_name', 'attendee_identifier')
         }),
         ('Información del Evento', {
             'fields': ('event',)

@@ -28,8 +28,8 @@ COPY backend/ .
 # Crear directorio para archivos estáticos y media
 RUN mkdir -p /app/staticfiles /app/media
 
-# Colectar archivos estáticos
-RUN python manage.py collectstatic --noinput || true
+# Nota: collectstatic se ejecuta en docker-compose command, no aquí
+# porque en build-time no tenemos acceso al archivo .env
 
 # Exponer puerto
 EXPOSE 8000

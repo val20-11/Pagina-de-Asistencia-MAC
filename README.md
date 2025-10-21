@@ -27,61 +27,94 @@ Sistema de gestión de asistencia para ponencias y eventos académicos de Matem�
 
 ## 🛠️ Instalación
 
+### 🌐 URLs de Acceso
+
+**Modo Desarrollo (HTTP - Recomendado para local):**
+- Aplicación: http://localhost
+- Admin: http://localhost/admin
+
+**Modo Producción (HTTPS - Con advertencia de certificados):**
+- Aplicación: https://localhost
+- Admin: https://localhost/admin
+
+📖 **Guía completa de acceso:** Ver [ACCESO_AL_SISTEMA.md](ACCESO_AL_SISTEMA.md)
+
+---
+
 ### Opción 1: Con Docker (Recomendado)
 
-#### Producción
+#### Desarrollo Local (HTTP sin SSL - Recomendado)
 
 ```bash
 # Clonar el repositorio
 git clone <url-del-repositorio>
-cd pagina-mac-og
+cd Pagina-de-Asistencia-MAC
 
-# Copiar variables de entorno
-cp .env.example .env
+# Copiar variables de entorno de desarrollo
+cp .env.development.example .env.development
 
-# IMPORTANTE: Editar .env y cambiar las credenciales para producción
-# Cambiar: SECRET_KEY, DB_PASSWORD, etc.
+# (Opcional) Personalizar tu .env.development
+# nano .env.development
+
+# Usar configuración de desarrollo (HTTP sin SSL)
+docker-compose -f docker-compose.dev.yml up --build -d
+
+# Ver logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Acceder a la aplicación
+# http://localhost (puerto 80 - sin advertencias de seguridad)
+```
+
+El sistema estará disponible en `http://localhost` con:
+- ✅ **Puerto 80** (HTTP estándar - sin advertencias de seguridad)
+- ✅ **Debug mode** activado
+- ✅ **Hot reload** para desarrollo
+- ✅ **Base de datos PostgreSQL** expuesta en puerto 5432
+- ✅ **Rate limiting** desactivado
+
+#### Producción (HTTPS con SSL)
+
+```bash
+# Copiar variables de entorno de producción
+cp .env.production.example .env.production
+
+# IMPORTANTE: Editar .env.production y cambiar las credenciales
+nano .env.production
+# - Generar SECRET_KEY segura: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+# - Cambiar DB_PASSWORD a una contraseña segura
+# - Verificar ALLOWED_HOSTS (tu dominio o IP)
+# - Verificar CORS_ALLOWED_ORIGINS (solo HTTPS)
 
 # Construir e iniciar contenedores
 docker-compose up --build -d
 
-# Ver logs
 docker-compose logs -f
 
 # Acceder a la aplicación
-# http://localhost
+# https://localhost (puerto 443 - aparecerá advertencia de certificados)
 ```
 
-El sistema estará disponible en `http://localhost` con:
-- **Frontend**: Servido por Nginx en puerto 80
-- **Backend**: API REST en `/api/`
-- **PostgreSQL**: Base de datos (puerto 5432 expuesto)
+El sistema estará disponible en `https://localhost` con:
+- 🔒 **Puerto 443** (HTTPS con SSL/TLS)
+- 🔒 **Certificados autofirmados** (advertencia "No seguro" en navegador - es normal)
+- 🔒 **Rate limiting** activado
+- 🔒 **Configuración de producción**
+- 🔒 **Base de datos PostgreSQL** NO expuesta (solo red interna)
 
-#### Desarrollo
+⚠️ **Advertencia de Certificados:**
+El navegador mostrará "No es seguro" porque usas certificados autofirmados. Ver [ACCESO_AL_SISTEMA.md](ACCESO_AL_SISTEMA.md) para instrucciones sobre cómo aceptar el certificado en cada navegador
+
+⚠️ **Nota sobre cambios en .env**:
+Si modificas el archivo `.env.development` o `.env.production` mientras los contenedores están corriendo, **DEBES reiniciarlos** para que los cambios surtan efecto:
 
 ```bash
-# Usar configuración de desarrollo
-docker-compose -f docker-compose.dev.yml up --build -d
+# Desarrollo
+docker-compose -f docker-compose.dev.yml restart
 
-# Ver logs
-docker-compose -f docker-compose.dev.yml logs -f backend
-
-# Acceder al contenedor backend
-docker-compose -f docker-compose.dev.yml exec backend bash
-
-# Ejecutar tests
-docker-compose -f docker-compose.dev.yml exec backend tox -e test
-
-# Ver documentación completa de desarrollo
-# docs/DESARROLLO.md
+# Producción
+docker-compose restart
 ```
-
-**Características del entorno de desarrollo:**
-- ✅ Hot reload automático (Django runserver)
-- ✅ Todas las herramientas de testing y calidad de código
-- ✅ PostgreSQL con puerto expuesto para acceso desde host
-- ✅ Debugging con ipdb
-- ✅ Ver `docs/DESARROLLO.md` para más detalles
 
 ### Opción 2: Instalación Manual
 
@@ -109,7 +142,7 @@ pip install django-import-export openpyxl tablib
 
 4. Configurar variables de entorno:
 ```bash
-cp .env.example .env
+cp .env.development.example .env
 # Editar .env con tus configuraciones
 ```
 
@@ -144,6 +177,44 @@ npm run dev
 ```
 
 El frontend estará disponible en `http://localhost:5173`
+
+## 🔄 Compartir Base de Datos con Colaboradores
+
+¿Quieres que tus colaboradores trabajen con los mismos datos que tú? El proyecto incluye scripts para compartir fácilmente la base de datos completa.
+
+### Para crear un backup y compartirlo:
+
+**Windows (PowerShell):**
+```powershell
+.\create_backup.ps1
+```
+
+**Linux/Mac:**
+```bash
+chmod +x create_backup.sh
+./create_backup.sh
+```
+
+Esto creará un archivo `backend/fixtures/db_full_backup.sql` que puedes:
+1. Subir a GitHub (ya está configurado en .gitignore para permitirlo)
+2. Compartir por Google Drive, Dropbox, etc.
+
+### Para restaurar el backup compartido:
+
+**Windows (PowerShell):**
+```powershell
+.\restore_database.ps1
+```
+
+**Linux/Mac:**
+```bash
+chmod +x restore_database.sh
+./restore_database.sh
+```
+
+📖 **Documentación completa:** Ver [COMPARTIR_BASE_DE_DATOS.md](COMPARTIR_BASE_DE_DATOS.md)
+
+---
 
 ## 📥 Importación y Exportación de Datos
 
@@ -282,18 +353,37 @@ Sigue las instrucciones para crear:
 
 ## 🔧 Configuración Adicional
 
-### Variables de Entorno (.env)
+### Variables de Entorno
+
+El proyecto usa archivos `.env` separados para desarrollo y producción:
+
+**Desarrollo** (`.env.development`):
 ```env
-SECRET_KEY=tu-clave-secreta
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-CORS_ALLOWED_ORIGINS=http://localhost:5173
+SECRET_KEY=django-insecure-dev-key-12345
+ALLOWED_HOSTS=localhost,127.0.0.1,nginx,backend
+CORS_ALLOWED_ORIGINS=http://localhost,http://127.0.0.1
 ```
+
+**Producción** (`.env.production`):
+```env
+DEBUG=False
+SECRET_KEY=<generar-clave-segura>
+ALLOWED_HOSTS=132.248.80.77,tudominio.com
+CORS_ALLOWED_ORIGINS=https://132.248.80.77,https://tudominio.com
+```
+
+📖 Ver `USO_ENV_FILES.md` para documentación completa sobre variables de entorno.
+
+⚠️ **IMPORTANTE**:
+- Los archivos `.env.development` y `.env.production` NO se suben a Git
+- Usa `.env.development.example` y `.env.production.example` como plantillas
+- Si modificas un archivo `.env` con contenedores corriendo, reinícialos: `docker-compose restart`
 
 ### CORS
 El backend está configurado para aceptar peticiones desde:
-- `http://localhost:5173` (desarrollo)
-- `http://127.0.0.1:5173` (desarrollo)
+- **Desarrollo**: `http://localhost`, `http://127.0.0.1` (configurado en `.env.development`)
+- **Producción**: `https://132.248.80.77` (configurado en `.env.production` - solo HTTPS)
 
 ## 🔒 Seguridad
 
@@ -383,12 +473,20 @@ Ver `docs/POSTGRESQL_MIGRATION.md` para más detalles.
 
 ## 📚 Documentación
 
+### Configuración y Despliegue
+- `USO_ENV_FILES.md` - **Guía completa de variables de entorno (.env)**
+- `DEPLOYMENT_PRODUCTION.md` - Despliegue en servidor de producción (132.248.80.77)
+- `CAMBIOS_SEGURIDAD_PUERTOS.md` - Configuración de puertos y seguridad
+
+### Desarrollo
 - `docs/DESARROLLO.md` - Guía completa de desarrollo
+- `docs/ESTRUCTURA_PROYECTO.md` - Estructura del proyecto
+- `docs/POSTGRESQL_MIGRATION.md` - Migración a PostgreSQL
+
+### Seguridad
 - `docs/SECURITY.md` - Guía de seguridad y checklist de producción
 - `docs/RATE_LIMITING.md` - Configuración de rate limiting
 - `docs/AUDIT.md` - Sistema de auditoría
-- `docs/POSTGRESQL_MIGRATION.md` - Migración a PostgreSQL
-- `docs/ESTRUCTURA_PROYECTO.md` - Estructura del proyecto
 
 ## 🚧 Mejoras Futuras
 

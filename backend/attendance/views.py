@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_ratelimit.decorators import ratelimit
-from authentication.models import UserProfile, ExternalUser
+from authentication.models import UserProfile
 from events.models import Event
 from .models import Attendance, AttendanceStats
 
@@ -48,62 +48,37 @@ def register_attendance(request):
             'error': 'Evento no encontrado'
         }, status=status.HTTP_404_NOT_FOUND)
     
-    # Buscar estudiante regular o usuario externo
-    student_profile = None
-    external_user = None
-    attendee_name = None
-
-    # Primero buscar en estudiantes regulares
+    # Buscar estudiante
     try:
         student_profile = UserProfile.objects.get(
             account_number=account_number,
             user_type='student'
         )
-        attendee_name = student_profile.full_name
     except UserProfile.DoesNotExist:
-        # Si no es estudiante, buscar en usuarios externos
-        try:
-            external_user = ExternalUser.objects.get(
-                account_number=account_number,
-                status='approved'
-            )
-            attendee_name = external_user.full_name
-        except ExternalUser.DoesNotExist:
-            return Response({
-                'error': f'Usuario con número de cuenta {account_number} no encontrado o no aprobado'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-    # Usar el asistente autenticado como registrador
-    assistant_profile = registrar_profile
+        return Response({
+            'error': f'Estudiante con número de cuenta {account_number} no encontrado'
+        }, status=status.HTTP_404_NOT_FOUND)
 
     # Verificar si ya tiene asistencia
-    if student_profile:
-        if Attendance.objects.filter(student=student_profile, event=event, is_valid=True).exists():
-            return Response({
-                'error': 'El estudiante ya tiene asistencia registrada para este evento'
-            }, status=status.HTTP_400_BAD_REQUEST)
-    elif external_user:
-        if Attendance.objects.filter(external_user=external_user, event=event, is_valid=True).exists():
-            return Response({
-                'error': 'El usuario externo ya tiene asistencia registrada para este evento'
-            }, status=status.HTTP_400_BAD_REQUEST)
+    if Attendance.objects.filter(student=student_profile, event=event, is_valid=True).exists():
+        return Response({
+            'error': 'El estudiante ya tiene asistencia registrada para este evento'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     # Crear asistencia
     try:
         attendance = Attendance.objects.create(
             student=student_profile,
-            external_user=external_user,
             event=event,
-            registered_by=assistant_profile,
+            registered_by=registrar_profile,
             registration_method='manual'
         )
 
         return Response({
-            'message': f'Asistencia registrada para {attendee_name}',
+            'message': f'Asistencia registrada para {student_profile.full_name}',
             'attendance_id': attendance.id,
             'event': event.title,
-            'registered_by': assistant_profile.full_name,
-            'attendee_type': 'student' if student_profile else 'external'
+            'registered_by': registrar_profile.full_name
         }, status=status.HTTP_201_CREATED)
 
     except Exception as e:
@@ -244,144 +219,4 @@ def get_my_attendances(request):
     except UserProfile.DoesNotExist:
         return Response({'error': 'Estudiante no encontrado'}, status=404)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@ratelimit(key='user', rate='60/m', method='GET', block=True)
-def get_external_user_attendances(request):
-    """Obtener asistencias de usuario externo: 60 consultas por minuto"""
-    account_number = request.GET.get('account_number')
-
-    if not account_number:
-        return Response({'error': 'Se requiere account_number'}, status=400)
-
-    # Normalizar el username para comparar (eliminar prefijo "ext_")
-    user_account = request.user.username.replace('ext_', '')
-
-    # Verificar que el usuario externo solo pueda ver sus propias asistencias
-    if user_account != account_number:
-        # Verificar si es asistente (pueden ver todas)
-        try:
-            requester_profile = request.user.userprofile
-            if requester_profile.user_type != 'assistant':
-                return Response({
-                    'error': 'Solo puedes consultar tus propias asistencias'
-                }, status=status.HTTP_403_FORBIDDEN)
-        except:
-            return Response({
-                'error': 'Solo puedes consultar tus propias asistencias'
-            }, status=status.HTTP_403_FORBIDDEN)
-
-    try:
-        external_user = ExternalUser.objects.get(
-            account_number=account_number,
-            status='approved'
-        )
-
-        # Obtener todas las asistencias válidas del usuario externo
-        attendances = Attendance.objects.filter(
-            external_user=external_user,
-            is_valid=True
-        ).select_related('event').order_by('-timestamp')
-
-        data = []
-        for attendance in attendances:
-            data.append({
-                'id': attendance.id,
-                'event': attendance.event.id,
-                'event_title': attendance.event.title,
-                'event_date': attendance.event.date.strftime('%Y-%m-%d'),
-                'timestamp': attendance.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-            })
-
-        return Response(data)
-    except ExternalUser.DoesNotExist:
-        return Response({'error': 'Usuario externo no encontrado o no aprobado'}, status=404)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@ratelimit(key='user', rate='30/m', method='GET', block=True)
-def get_external_user_stats(request):
-    """Obtener estadísticas de usuario externo: 30 consultas por minuto"""
-    account_number = request.GET.get('account_number')
-
-    if not account_number:
-        return Response({'error': 'Se requiere account_number'}, status=400)
-
-    # Normalizar el username para comparar (eliminar prefijo "ext_")
-    user_account = request.user.username.replace('ext_', '')
-
-    # Verificar que el usuario externo solo pueda ver sus propias estadísticas
-    if user_account != account_number:
-        # Verificar si es asistente (pueden ver todas)
-        try:
-            requester_profile = request.user.userprofile
-            if requester_profile.user_type != 'assistant':
-                return Response({
-                    'error': 'Solo puedes consultar tus propias estadísticas'
-                }, status=status.HTTP_403_FORBIDDEN)
-        except:
-            return Response({
-                'error': 'Solo puedes consultar tus propias estadísticas'
-            }, status=status.HTTP_403_FORBIDDEN)
-
-    try:
-        external_user = ExternalUser.objects.get(
-            account_number=account_number,
-            status='approved'
-        )
-
-        # Obtener todos los eventos activos
-        all_events = Event.objects.filter(is_active=True).order_by('date', 'start_time')
-
-        # Agrupar eventos por bloques de horario (misma fecha y horarios que se solapan)
-        # Usar la misma lógica que AttendanceStats.update_stats()
-        event_slots = {}  # {(fecha, hora_inicio, hora_fin): [lista de eventos]}
-
-        for event in all_events:
-            # Crear una clave única para el bloque horario
-            slot_key = (event.date, event.start_time, event.end_time)
-
-            # Buscar si hay un slot existente que se solape con este evento
-            found_slot = False
-            for existing_slot in list(event_slots.keys()):
-                existing_date, existing_start, existing_end = existing_slot
-
-                # Verificar si es el mismo día y hay solapamiento de horarios
-                if event.date == existing_date:
-                    # Hay solapamiento si el inicio de uno es menor al fin del otro
-                    if (event.start_time < existing_end and event.end_time > existing_start):
-                        event_slots[existing_slot].append(event)
-                        found_slot = True
-                        break
-
-            # Si no encontramos un slot existente, crear uno nuevo
-            if not found_slot:
-                event_slots[slot_key] = [event]
-
-        # El total de "bloques" es la cantidad de slots únicos
-        total_slots = len(event_slots)
-
-        # Obtener asistencias del usuario externo
-        user_attendances = Attendance.objects.filter(
-            external_user=external_user,
-            is_valid=True
-        ).values_list('event_id', flat=True)
-
-        # Contar cuántos bloques tiene asistencia
-        attended_slots = 0
-        for slot_events in event_slots.values():
-            # Si asistió a al menos uno de los eventos del bloque, cuenta
-            event_ids = [e.id for e in slot_events]
-            if any(event_id in user_attendances for event_id in event_ids):
-                attended_slots += 1
-
-        # Calcular porcentaje
-        attendance_percentage = round((attended_slots / total_slots) * 100, 2) if total_slots > 0 else 0.0
-
-        return Response({
-            'total_events': total_slots,
-            'attended_events': attended_slots,
-            'attendance_percentage': attendance_percentage
-        })
-    except ExternalUser.DoesNotExist:
-        return Response({'error': 'Usuario externo no encontrado o no aprobado'}, status=404)
+# Funciones de usuarios externos eliminadas - Todos los usuarios son ahora estudiantes regulares

@@ -19,7 +19,19 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+# ALLOWED_HOSTS - En producción NO debe incluir localhost
+# Solo se permite localhost si DEBUG=True
+if DEBUG:
+    # Desarrollo: permitir localhost
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+else:
+    # Producción: NO permitir localhost, solo dominios reales
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+    if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+        raise ValueError(
+            "⚠️  ERROR: ALLOWED_HOSTS debe configurarse en producción (DEBUG=False). "
+            "Ejemplo: ALLOWED_HOSTS=tudominio.com,www.tudominio.com"
+        )
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -42,12 +54,12 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'mac_attendance.middleware.DisableCSRFOnAPIMiddleware',  # Exentar API de CSRF (usamos JWT)
+    'authentication.middleware.DisableCSRFOnAPIMiddleware',  # Exentar API de CSRF (usamos JWT)
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'mac_attendance.middleware.AuditMiddleware',  # Auditoría de seguridad
+    'authentication.middleware.AuditMiddleware',  # Auditoría de seguridad
 ]
 
 # Rate Limiting Configuration
@@ -146,19 +158,38 @@ if not DEBUG:
     # Proxy Settings (para uso detrás de nginx/apache)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# CORS settings
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost,http://127.0.0.1,http://localhost:5173,http://127.0.0.1:5173'
-).split(',')
+# CORS settings - NO permitir localhost en producción
+if DEBUG:
+    # Desarrollo: permitir localhost
+    CORS_ALLOWED_ORIGINS = config(
+        'CORS_ALLOWED_ORIGINS',
+        default='http://localhost,http://127.0.0.1,https://localhost,https://127.0.0.1'
+    ).split(',')
+    CSRF_TRUSTED_ORIGINS = config(
+        'CSRF_TRUSTED_ORIGINS',
+        default='http://localhost,http://127.0.0.1,https://localhost,https://127.0.0.1'
+    ).split(',')
+else:
+    # Producción: NO permitir localhost, solo HTTPS con dominio real
+    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
+    CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',')
+
+    # Validar que se hayan configurado orígenes en producción
+    if not CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGINS == ['']:
+        raise ValueError(
+            "⚠️  ERROR: CORS_ALLOWED_ORIGINS debe configurarse en producción. "
+            "Ejemplo: CORS_ALLOWED_ORIGINS=https://tudominio.com,https://www.tudominio.com"
+        )
+
+    # Validar que TODOS los orígenes usen HTTPS
+    for origin in CORS_ALLOWED_ORIGINS:
+        if not origin.startswith('https://'):
+            raise ValueError(
+                f"⚠️  ERROR: En producción, todos los orígenes deben usar HTTPS. "
+                f"Origen inválido: {origin}"
+            )
 
 CORS_ALLOW_CREDENTIALS = True
-
-# CSRF Settings - Exentar rutas de API ya que usamos JWT
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost,http://127.0.0.1'
-).split(',')
 
 # Exentar todas las rutas de API del CSRF check (usamos JWT para seguridad)
 CSRF_EXEMPT_URLS = [r'^api/.*$']
