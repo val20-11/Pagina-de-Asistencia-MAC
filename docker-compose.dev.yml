@@ -26,7 +26,6 @@ services:
       dockerfile: docker/Dockerfile.backend.dev
     command: >
       sh -c "python manage.py migrate &&
-             python init_db.py &&
              python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
@@ -40,8 +39,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"  # Exponer puerto 8000 al host
     stdin_open: true  # Para ipdb y debugging interactivo
     tty: true
 
