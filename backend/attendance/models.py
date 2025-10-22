@@ -129,10 +129,45 @@ class Attendance(models.Model):
                 )
     
     def save(self, *args, **kwargs):
-        # Permitir omitir validación para importaciones históricas
+        # Permitir omitir validación de tiempo para importaciones históricas
         skip_validation = kwargs.pop('skip_validation', False)
+
         if not skip_validation:
+            # Validación completa
             self.clean()
+        else:
+            # Aún en importaciones históricas, validar duplicados y eventos simultáneos
+            # Validar que no haya duplicados
+            existing = Attendance.objects.filter(
+                student=self.student,
+                event=self.event,
+                is_valid=True
+            )
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError("Este estudiante ya tiene asistencia registrada para este evento.")
+
+            # Validar eventos simultáneos
+            if self.student:
+                overlapping_events = Event.objects.filter(
+                    date=self.event.date,
+                    start_time__lt=self.event.end_time,
+                    end_time__gt=self.event.start_time,
+                    is_active=True
+                ).exclude(id=self.event.id)
+
+                existing_attendance = Attendance.objects.filter(
+                    student=self.student,
+                    event__in=overlapping_events,
+                    is_valid=True
+                ).exists()
+
+                if existing_attendance:
+                    raise ValidationError(
+                        "El estudiante ya tiene asistencia registrada en un evento simultáneo."
+                    )
+
         super().save(*args, **kwargs)
 
         # Actualizar estadísticas del estudiante

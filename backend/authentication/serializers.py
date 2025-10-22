@@ -35,9 +35,28 @@ class LoginSerializer(serializers.Serializer):
         try:
             profile = UserProfile.objects.get(account_number=account_number)
             user = profile.user
+
+            # Si el perfil no tiene usuario asociado (estudiantes sin cuenta Django)
+            if user is None:
+                # Crear usuario de Django automáticamente para estudiantes
+                if profile.user_type == 'student':
+                    user, created = User.objects.get_or_create(
+                        username=account_number,
+                        defaults={
+                            'first_name': profile.full_name,
+                            'is_active': True
+                        }
+                    )
+                    profile.user = user
+                    profile.save()
+                else:
+                    raise serializers.ValidationError('Esta cuenta no tiene acceso al sistema.')
+
             if not user.is_active:
                 raise serializers.ValidationError('Esta cuenta está desactivada.')
+
             data['user'] = user
+            data['profile'] = profile
             return data
         except UserProfile.DoesNotExist:
             pass
