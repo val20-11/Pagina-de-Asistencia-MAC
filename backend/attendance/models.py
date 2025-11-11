@@ -171,7 +171,9 @@ class Attendance(models.Model):
         super().save(*args, **kwargs)
 
         # Actualizar estadísticas del estudiante
-        self.update_student_stats()
+        # (omitir si se está importando - se actualizará en batch al final)
+        if not getattr(self, '_skip_stats_update', False):
+            self.update_student_stats()
     
     def update_student_stats(self):
         """Actualizar las estadísticas de asistencia del estudiante"""

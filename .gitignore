@@ -103,6 +103,12 @@ backend/.env
 *.key
 *.crt
 
+# EXCEPCIÓN: Permitir archivos .example como plantillas
+!.env.example
+!.env.development.example
+!.env.production.example
+!backend/.env.example
+
 # ==============================================
 # Uploads y Media
 # ==============================================
