@@ -48,7 +48,7 @@ services:
       - "443:443"  # HTTPS (SSL/TLS) - ÚNICO puerto expuesto al host
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./docker/ssl:/etc/nginx/ssl:ro  # Certificados SSL (solo lectura)
+      - ssl-certs:/etc/nginx/certs  # Certificados SSL (generados automáticamente y persistentes)
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
@@ -65,3 +65,4 @@ volumes:
   static_volume:
   media_volume:
   postgres_data:
+  ssl-certs:  # Volumen para certificados SSL persistentes

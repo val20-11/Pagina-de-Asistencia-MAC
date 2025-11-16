@@ -18,10 +18,22 @@ RUN npm run build
 # Etapa 2: Nginx para servir el frontend
 FROM nginx:alpine
 
+# Instalar OpenSSL para generar certificados SSL
+RUN apk add --no-cache openssl
+
+# Crear directorio para certificados SSL con permisos apropiados
+RUN mkdir -p /etc/nginx/certs && \
+    chmod 755 /etc/nginx/certs
+
+# Copiar script de generación de certificados SSL
+# Los scripts en /docker-entrypoint.d/ se ejecutan automáticamente al iniciar nginx
+COPY docker/40-create-ssl-certificate.sh /docker-entrypoint.d/40-create-ssl-certificate.sh
+RUN chmod +x /docker-entrypoint.d/40-create-ssl-certificate.sh
+
 # Copiar archivos construidos del frontend
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
 
-# Exponer puerto
-EXPOSE 80
+# Exponer puertos
+EXPOSE 80 443
 
 CMD ["nginx", "-g", "daemon off;"]
